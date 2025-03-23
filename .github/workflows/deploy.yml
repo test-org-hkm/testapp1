@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 env:
-  DOCKER_IMAGE: himanshukmyatri/ocd
-  DOCKER_IMAGE_TAG: "${{ github.repository_owner }}-${{ github.event.repository.name }}-${{github.head_ref || github.ref_name}}-${{github.run_number}}"
+  DOCKER_IMAGE: "himanshukmyatri/ocd"
+  DOCKER_IMAGE_TAG: "${{ github.repository_owner }}-${{ github.event.repository.name }}-${{github.head_ref || github.ref_name}}-${{github.run_number}}-${{github.run_attempt}}"
 
 jobs:
   build-and-deploy:
