@@ -1,0 +1,119 @@
+name: Build and Deploy to K8s
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOCKER_IMAGE: himanshukmyatri/workdir
+  IMAGE_TAG: "${{ github.sha }}"
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check if Dockerfile exists
+        run: |
+          if [ ! -f Dockerfile ]; then
+            echo "::error::Dockerfile not found in repository. Please add a Dockerfile."
+            exit 1
+          fi
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          docker build --no-cache --platform linux/amd64 -t ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }} .
+          docker tag ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }} ${{ env.DOCKER_IMAGE }}:latest
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.DOCKER_IMAGE }}:latest
+
+      - name: Generate Kubernetes Manifests
+        run: |
+          mkdir -p k8s
+          
+          # Create deployment.yaml
+          cat > k8s/deployment.yaml << EOF
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: workdir
+            labels:
+              app: workdir
+            namespace: default
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: workdir
+            strategy:
+              type: RollingUpdate
+              rollingUpdate:
+                maxSurge: 1
+                maxUnavailable: 0
+            template:
+              metadata:
+                labels:
+                  app: workdir
+              spec:
+                containers:
+                  - name: workdir
+                    image: ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
+                    imagePullPolicy: IfNotPresent
+                    ports:
+                      - containerPort: 8080
+                    resources:
+                      requests:
+                        cpu: "200m"
+                        memory: "512Mi"
+                    livenessProbe:
+                      httpGet:
+                        path: /health
+                        port: 8080
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                    readinessProbe:
+                      httpGet:
+                        path: /health
+                        port: 8080
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+          EOF
+
+          # Create service.yaml
+          cat > k8s/service.yaml << EOF
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: workdir
+            namespace: default
+          spec:
+            selector:
+              app: workdir
+            ports:
+              - port: 8080
+                targetPort: 8080
+            type: ClusterIP
+          EOF
+    
+      - name: Deploy to Kubernetes
+        uses: azure/k8s-deploy@v4
+        with:
+          namespace: default
+          manifests: |
+            k8s/deployment.yaml
+            k8s/service.yaml
+          images: |
+            ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
