@@ -7,7 +7,7 @@ on:
 
 env:
   DOCKER_IMAGE: himanshukmyatri/ocd
-  IMAGE_TAG: "${{ github.repository_owner }}/${{ github.event.repository.name }}:${{github.head_ref || github.ref_name}}-${{github.run_number}}"
+  DOCKER_IMAGE_TAG: "${{ github.repository_owner }}/${{ github.event.repository.name }}:${{github.head_ref || github.ref_name}}-${{github.run_number}}"
 
 jobs:
   build-and-deploy:
@@ -32,11 +32,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build --no-cache --platform linux/amd64 -t ${{ secrets.QA_DOCKER_USERNAME }}/${{env.DOCKER_IMAGE}}:${{env.docker_image_version}} .
+          docker build --no-cache --platform linux/amd64 -t ${{env.DOCKER_IMAGE}}:${{env.DOCKER_IMAGE_TAG}} .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.QA_DOCKER_USERNAME }}/${{env.DOCKER_IMAGE}}:${{env.docker_image_version}}
+          docker push ${{env.DOCKER_IMAGE}}:${{env.DOCKER_IMAGE_TAG}}
 
       - name: Generate Kubernetes Manifests
         run: |
@@ -68,7 +68,7 @@ jobs:
               spec:
                 containers:
                   - name: workdir
-                    image: ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
+                    image: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
                     imagePullPolicy: IfNotPresent
                     ports:
                       - containerPort: 8080
@@ -114,4 +114,4 @@ jobs:
             k8s/deployment.yaml
             k8s/service.yaml
           images: |
-            ${{ env.DOCKER_IMAGE }}:${{ env.IMAGE_TAG }}
+            ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_IMAGE_TAG }}
