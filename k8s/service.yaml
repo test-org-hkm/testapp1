@@ -4,9 +4,9 @@ metadata:
   name: testapp1
   namespace: utils
 spec:
+  selector:
+    app: testapp1
   ports:
   - port: 8000
     targetPort: 8000
-  selector:
-    app: testapp1
-  type: ClusterIP
+  type: ClusterIP 
