@@ -1,4 +1,3 @@
-
 name: Build and Deploy
 on:
   push:
@@ -6,7 +5,7 @@ on:
       - main
 env:
   API_BASE_URL: ${{ secrets.API_BASE_URL }}
-  APP_NAME: testapp1
+  APP_NAME: *#repo_name#*
   NAMESPACE: utils
   AWS_REGION: ap-south-1
 jobs:
