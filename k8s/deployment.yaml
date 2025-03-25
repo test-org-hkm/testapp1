@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testapp1
+  namespace: utils
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: testapp1
+  template:
+    metadata:
+      labels:
+        app: testapp1
+    spec:
+      containers:
+      - env:
+        - name: DOMAIN_NAME
+          value: example.com
+        - name: OPENAI
+          value: qwerty
+        - name: DEBUG
+          value: 'false'
+        image: 147728078333.dkr.ecr.ap-south-1.amazonaws.com/testapp1:latest
+        name: testapp1
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
