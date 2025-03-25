@@ -21,28 +21,16 @@ spec:
         - containerPort: 3000
         resources:
           limits:
-            cpu: 204m
+            cpu: 205m
             memory: 512Mi
           requests:
-            cpu: 204m
+            cpu: 205m
             memory: 512Mi
         envFrom:
         - secretRef:
             name: testapp1-secrets
-        
         env:
-        
-        
-        
-        
-        
-        
-        
         - name: REDIS_HOST
           value: "redis-service"
         - name: REDIS_PORT
-          value: "6379"
-        
-        
-        
-         
+          value: "6379" 
