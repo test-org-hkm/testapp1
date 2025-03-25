@@ -1,93 +1,42 @@
 name: Build and Deploy
+
 on:
   push:
-    branches:
-      - main
-env:
-  API_BASE_URL: ${{ secrets.API_BASE_URL }}
-  APP_NAME: testapp1
-  NAMESPACE: utils
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+    branches: [ main ]
+  workflow_dispatch:
 
-      - name: Check and create ECR repository if needed
-        id: create-repository
-        env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          ECR_NAMESPACE: ${{ vars.AWS_ECR_NAMESPACE }}
-          ECR_REPOSITORY: ${{ github.event.repository.name }}
-        run: |
-          # Check if repository exists
-          if ! aws ecr describe-repositories --repository-names "$ECR_NAMESPACE/$ECR_REPOSITORY" --region $AWS_REGION 2>/dev/null; then
-            echo "Repository does not exist. Creating it now..."
-            aws ecr create-repository --repository-name "$ECR_NAMESPACE/$ECR_REPOSITORY" --region $AWS_REGION
-            echo "Repository created successfully."
-          else
-            echo "Repository already exists."
-          fi
-            
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/yatri-motorcycles/testapp1
+
       - name: Build and push Docker image
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_NAMESPACE: ${{ vars.AWS_ECR_NAMESPACE }}
-          ECR_REPOSITORY: ${{ github.event.repository.name }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-      
-      - name: Check if deployment exists via API
-        id: check-deployment
-        run: |
-          RESPONSE=$(curl -s -X GET \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.API_TOKEN }}" \
-            "${{ env.API_BASE_URL }}/api/deployment/exists?name=${{ env.APP_NAME }}&namespace=${{ env.NAMESPACE }}")
-          EXISTS=$(echo $RESPONSE | jq -r '.exists')
-          echo "exists=$EXISTS" >> $GITHUB_OUTPUT
-          echo "Deployment exists: $EXISTS"
-      
-      - name: Call API to patch deployment
-        if: steps.check-deployment.outputs.exists == 'true'
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.API_TOKEN }}" \
-            -d "{\"deployment\": \"${{ env.APP_NAME }}\", \"namespace\": \"${{ env.NAMESPACE }}\", \"image\": \"$ECR_REGISTRY/${{ github.event.repository.name }}:$IMAGE_TAG\"}" \
-            ${{ env.API_BASE_URL }}/api/deployment/patch
-      
-      - name: Apply K8s files via API if deployment doesn't exist
-        if: steps.check-deployment.outputs.exists == 'false'
-        run: |
-          DEPLOYMENT_YAML=$(cat k8s/deployment.yaml | base64 -w 0)
-          SECRET_YAML=$(cat k8s/secret.yaml | base64 -w 0)
-          SERVICE_YAML=$(cat k8s/service.yaml | base64 -w 0)
-          
-          curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.API_TOKEN }}" \
-            -d "{\"files\":[{\"name\":\"deployment.yaml\",\"content\":\"$DEPLOYMENT_YAML\"},
-                {\"name\":\"secret.yaml\",\"content\":\"$SECRET_YAML\"},
-                {\"name\":\"service.yaml\",\"content\":\"$SERVICE_YAML\"}]}" \
-            ${{ env.API_BASE_URL }}/api/deployment/apply
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }} 
