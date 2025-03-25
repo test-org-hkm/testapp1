@@ -25,6 +25,22 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Check and create ECR repository if needed
+        id: create-repository
+        env:
+          AWS_REGION: ap-south-1  # Set your region
+          ECR_NAMESPACE: one-click-deployer  # Set from vars or directly
+          ECR_REPOSITORY: ${{ github.event.repository.name }}  # Or a custom name
+        run: |
+          # Check if repository exists
+          if ! aws ecr describe-repositories --repository-names "$ECR_NAMESPACE/$ECR_REPOSITORY" --region $AWS_REGION 2>/dev/null; then
+            echo "Repository does not exist. Creating it now..."
+            aws ecr create-repository --repository-name "$ECR_NAMESPACE/$ECR_REPOSITORY" --region $AWS_REGION
+            echo "Repository created successfully."
+          else
+            echo "Repository already exists."
+          fi
             
       - name: Build and push Docker image
         id: build-image
