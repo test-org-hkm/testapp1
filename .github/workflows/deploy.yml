@@ -28,16 +28,35 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
-      run: '|'
+      run: "|\n          docker build -t $ECR_REGISTRY/${{ github.event.repository.name\
+        \ }}:$IMAGE_TAG .\n          docker push $ECR_REGISTRY/${{ github.event.repository.name\
+        \ }}:$IMAGE_TAG\n          echo \"image=$ECR_REGISTRY/${{ github.event.repository.name\
+        \ }}:$IMAGE_TAG\" >> $GITHUB_OUTPUT"
     - name: Check if deployment exists via API
       id: check-deployment
-      run: '|'
+      run: "|\n          RESPONSE=$(curl -s -X GET -H \"Content-Type: application/json\"\
+        \ -H \"Authorization: Bearer ${{ secrets.API_TOKEN }}\" \"${{ env.API_BASE_URL\
+        \ }}/api/deployment/exists?name=${{ env.APP_NAME }}&namespace=${{ env.NAMESPACE\
+        \ }}\")\n          EXISTS=$(echo $RESPONSE | jq -r '.exists')\n          echo\
+        \ \"exists=$EXISTS\" >> $GITHUB_OUTPUT\n          echo \"Deployment exists:\
+        \ $EXISTS\""
     - name: Call API to patch deployment
       if: steps.check-deployment.outputs.exists == 'true'
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
-      run: '|'
+      run: "|\n          curl -X POST -H \"Content-Type: application/json\" -H \"\
+        Authorization: Bearer ${{ secrets.API_TOKEN }}\" -d \"{\\\"deployment\\\"\
+        : \\\"${{ env.APP_NAME }}\\\", \\\"namespace\\\": \\\"${{ env.NAMESPACE }}\\\
+        \", \\\"image\\\": \\\"$ECR_REGISTRY/${{ github.event.repository.name }}:$IMAGE_TAG\\\
+        \"}\" ${{ env.API_BASE_URL }}/api/deployment/patch"
     - name: Apply K8s files via API if deployment doesn't exist
       if: steps.check-deployment.outputs.exists == 'false'
-      run: '|'
+      run: "|\n          DEPLOYMENT_YAML=$(cat k8s/deployment.yaml | base64 -w 0)\n\
+        \          SECRET_YAML=$(cat k8s/secret.yaml | base64 -w 0)\n          SERVICE_YAML=$(cat\
+        \ k8s/service.yaml | base64 -w 0)\n          curl -X POST -H \"Content-Type:\
+        \ application/json\" -H \"Authorization: Bearer ${{ secrets.API_TOKEN }}\"\
+        \ -d \"{\\\"files\\\":[{\\\"name\\\":\\\"deployment.yaml\\\",\\\"content\\\
+        \":\\\"$DEPLOYMENT_YAML\\\"},{\\\"name\\\":\\\"secret.yaml\\\",\\\"content\\\
+        \":\\\"$SECRET_YAML\\\"},{\\\"name\\\":\\\"service.yaml\\\",\\\"content\\\"\
+        :\\\"$SERVICE_YAML\\\"}]}\" ${{ env.API_BASE_URL }}/api/deployment/apply"
