@@ -2,17 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: testapp1
-  namespace: utils
+  labels:
+    app: testapp1
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: testapp1
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -20,37 +16,33 @@ spec:
     spec:
       containers:
       - name: testapp1
-        image: 147728078333.dkr.ecr.ap-south-1.amazonaws.com/testapp1:latest
-        imagePullPolicy: IfNotPresent
+        image: ghcr.io/yatri-motorcycles/testapp1:latest
         ports:
-        - containerPort: 8000
+        - containerPort: 3000
+        resources:
+          limits:
+            cpu: 204m
+            memory: 512Mi
+          requests:
+            cpu: 204m
+            memory: 512Mi
         envFrom:
         - secretRef:
-            name: testapp1-secret
-        env: - name: DOMAIN_NAME
-  value: mydomain
-- name: REDIS_HOST
-  value: redis-master.default.svc.cluster.local
-- name: REDIS_PORT
-  value: '6379'
-- name: claude
-  value: qwertyqwerty
-- name: debug_level
-  value: 'false'
-
-        resources:
-          requests:
-            cpu: 203m
-            memory: 512Mi
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 5 
+            name: testapp1-secrets
+        
+        env:
+        
+        
+        
+        
+        
+        
+        
+        - name: REDIS_HOST
+          value: "redis-service"
+        - name: REDIS_PORT
+          value: "6379"
+        
+        
+        
+         
