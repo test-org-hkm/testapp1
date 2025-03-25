@@ -21,7 +21,20 @@ spec:
       containers:
       - env:
         - name: DOMAIN_NAME
-          value: ''
+          value: null
+        - name: REDIS_HOST
+          value: redis-master.default.svc.cluster.local
+        - name: REDIS_PORT
+          value: '6379'
+        - name: POSTGRES_HOST
+          value: postgres.default.svc.cluster.local
+        - name: POSTGRES_PORT
+          value: '5432'
+        - name: POSTGRES_DB
+          value: application
+        envFrom:
+        - secretRef:
+            name: testapp1-secret
         image: 147728078333.dkr.ecr.ap-south-1.amazonaws.com/testapp1:latest
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -41,5 +54,5 @@ spec:
           periodSeconds: 5
         resources:
           requests:
-            cpu: ''
-            memory: ''
+            cpu: 200m
+            memory: 512Mi
