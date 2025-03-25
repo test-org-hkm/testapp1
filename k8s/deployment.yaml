@@ -21,28 +21,7 @@ spec:
       containers:
       - env:
         - name: DOMAIN_NAME
-          value: domain1
-        - name: CLICKHOUSE_HOST
-          value: 10.6.155.14
-        - name: CLICKHOUSE_PORT
-          value: '9000'
-        - name: CLICKHOUSE_DATABASE
-          value: atlas_driver_offer_bpp
-        - name: REDIS_HOST
-          value: redis-master.default.svc.cluster.local
-        - name: REDIS_PORT
-          value: '6379'
-        - name: POSTGRES_HOST
-          value: postgres.default.svc.cluster.local
-        - name: POSTGRES_PORT
-          value: '5432'
-        - name: POSTGRES_DB
-          value: application
-        - name: openai
-          value: afssaffsafsa
-        envFrom:
-        - secretRef:
-            name: testapp1-secret
+          value: ''
         image: 147728078333.dkr.ecr.ap-south-1.amazonaws.com/testapp1:latest
         imagePullPolicy: IfNotPresent
         livenessProbe:
@@ -62,5 +41,5 @@ spec:
           periodSeconds: 5
         resources:
           requests:
-            cpu: 200m
-            memory: 512Mi
+            cpu: ''
+            memory: ''
