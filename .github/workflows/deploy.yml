@@ -7,7 +7,7 @@ env:
   API_BASE_URL: ${{ secrets.API_BASE_URL }}
   APP_NAME: testapp1
   NAMESPACE: utils
-  AWS_REGION: ap-south-1
+  AWS_REGION: ${{ secrets.AWS_REGION }}
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
