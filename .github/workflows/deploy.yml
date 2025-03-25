@@ -5,7 +5,7 @@ on:
       - main
 env:
   API_BASE_URL: ${{ secrets.API_BASE_URL }}
-  APP_NAME: *#repo_name#*
+  APP_NAME: testapp1
   NAMESPACE: utils
   AWS_REGION: ap-south-1
 jobs:
