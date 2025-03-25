@@ -30,7 +30,7 @@ jobs:
         id: create-repository
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          ECR_NAMESPACE: $ {{ vars.AWS_ECR_NAMESPACE }}
+          ECR_NAMESPACE: ${{ vars.AWS_ECR_NAMESPACE }}
           ECR_REPOSITORY: ${{ github.event.repository.name }}
         run: |
           # Check if repository exists
