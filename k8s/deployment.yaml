@@ -9,54 +9,48 @@ spec:
     matchLabels:
       app: testapp1
   strategy:
+    type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 0
-    type: RollingUpdate
   template:
     metadata:
       labels:
         app: testapp1
     spec:
       containers:
-      - env:
-        - name: DOMAIN_NAME
-          value: mydomain
-        - name: CLICKHOUSE_HOST
-          value: 10.6.155.14
-        - name: CLICKHOUSE_PORT
-          value: '9000'
-        - name: CLICKHOUSE_DATABASE
-          value: atlas_driver_offer_bpp
-        - name: REDIS_HOST
-          value: redis-master.default.svc.cluster.local
-        - name: REDIS_PORT
-          value: '6379'
-        - name: claude
-          value: qwertyqwerty
-        - name: debug
-          value: 'false'
+      - name: testapp1
+        image: 147728078333.dkr.ecr.ap-south-1.amazonaws.com/testapp1:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
         envFrom:
         - secretRef:
             name: testapp1-secret
-        image: 147728078333.dkr.ecr.ap-south-1.amazonaws.com/testapp1:latest
-        imagePullPolicy: IfNotPresent
+        env: - name: DOMAIN_NAME
+  value: mydomain
+- name: REDIS_HOST
+  value: redis-master.default.svc.cluster.local
+- name: REDIS_PORT
+  value: '6379'
+- name: claude
+  value: qwertyqwerty
+- name: debug_level
+  value: 'false'
+
+        resources:
+          requests:
+            cpu: 203m
+            memory: 512Mi
         livenessProbe:
           httpGet:
             path: /health
             port: 8000
           initialDelaySeconds: 30
           periodSeconds: 10
-        name: testapp1
-        ports:
-        - containerPort: 8000
         readinessProbe:
           httpGet:
             path: /health
             port: 8000
           initialDelaySeconds: 5
-          periodSeconds: 5
-        resources:
-          requests:
-            cpu: 202m
-            memory: 512Mi
+          periodSeconds: 5 
