@@ -1,36 +1,55 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: testapp1
+  name: himanshu-ka-domain
   labels:
-    app: testapp1
+    app: himanshu-ka-domain
+  namespace: utils
 spec:
-  replicas: 1
+  replicas:1
   selector:
     matchLabels:
-      app: testapp1
+      app: himanshu-ka-domain
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   template:
     metadata:
       labels:
-        app: testapp1
+        app: himanshu-ka-domain
     spec:
       containers:
-      - name: testapp1
-        image: ghcr.io/yatri-motorcycles/testapp1:latest
+      - name: himanshu-ka-domain
+        image: 
+        imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 3000
+        - containerPort: 8000
         resources:
           limits:
-            cpu: 207m
+            cpu: 200m
             memory: 512Mi
           requests:
-            cpu: 207m
+            cpu: 200m
             memory: 512Mi
         envFrom:
         - secretRef:
-            name: testapp1-secrets
+            name: himanshu-ka-domain-secrets
         env:
         - name: REDIS_HOST
           value: "redis-service"
         - name: REDIS_PORT
-          value: "6379" 
+          value: "6379"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5 
