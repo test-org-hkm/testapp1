@@ -60,10 +60,10 @@ jobs:
       - name: Read deployment config
         id: config
         run: |
-          # Read the deployment config file
           if [ -f "deploy-config.json" ]; then
-            CONFIG=$(cat deploy-config.json)
-            echo "config=$CONFIG" >> $GITHUB_OUTPUT
+            echo "config<<EOF" >> $GITHUB_OUTPUT
+            cat deploy-config.json >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
             echo "Config loaded successfully."
           else
             echo "Error: deploy-config.json not found."
