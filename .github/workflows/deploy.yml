@@ -60,9 +60,11 @@ jobs:
       - name: Read deployment config
         id: config
         run: |
+          # Read the deployment config file and escape it properly for GitHub Actions
           if [ -f "deploy-config.json" ]; then
+            CONFIG=$(cat deploy-config.json | jq -c '.')
             echo "config<<EOF" >> $GITHUB_OUTPUT
-            cat deploy-config.json >> $GITHUB_OUTPUT
+            echo "$CONFIG" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
             echo "Config loaded successfully."
           else
