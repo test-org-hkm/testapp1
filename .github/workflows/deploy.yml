@@ -88,11 +88,11 @@ jobs:
           echo "Deployment exists value: $EXISTS"
           echo "exists=$EXISTS" >> $GITHUB_OUTPUT
       
-      - name: Apply K8s files via API if deployment doesn't exist
+      - name: Apply K8s files via API if deployment does not exist
         if: steps.check-deployment.outputs.exists == 'false'
         run: |
           DEPLOYMENT_YAML=$(cat k8s/deployment.yaml | base64 -w 0)
-          SECRET_YAML=$(cat k8s/secret.yaml | base64 -w 0)
+          SECRET_YAML=$(cat k8s/secrets.yaml | base64 -w 0)
           SERVICE_YAML=$(cat k8s/service.yaml | base64 -w 0)
           
           curl -X POST \
