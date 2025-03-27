@@ -45,15 +45,25 @@ jobs:
             echo "Repository already exists."
           fi
             
+      - name: Build and push Docker image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_NAMESPACE: ${{ vars.AWS_ECR_NAMESPACE }}
+          ECR_REPOSITORY: ${{ github.event.repository.name }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
       - name: Read deployment config
         id: config
         run: |
           if [ -f "deploy-config.json" ]; then
-            # Use a more unique delimiter
-            echo "config<<ENDOFCONFIG" >> $GITHUB_OUTPUT
+            echo "config<<EOF" >> $GITHUB_OUTPUT
             cat deploy-config.json >> $GITHUB_OUTPUT
-            # Make sure this is on its own line with no spaces
-            echo "ENDOFCONFIG" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
             echo "Config loaded successfully."
           else
             echo "Error: deploy-config.json not found."
