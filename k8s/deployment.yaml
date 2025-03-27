@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: my-domain-1
-        image: 
+        image: __IMAGE_PLACEHOLDER__
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
