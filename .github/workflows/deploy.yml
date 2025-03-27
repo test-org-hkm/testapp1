@@ -87,6 +87,11 @@ jobs:
           
           echo "Deployment exists value: $EXISTS"
           echo "exists=$EXISTS" >> $GITHUB_OUTPUT
+
+      - name: Update deployment image
+        run: |
+          # Replace the image placeholder with the actual image
+          sed -i "s|__IMAGE_PLACEHOLDER__|${{ steps.build-image.outputs.image }}|g" k8s/deployment.yaml
       
       - name: Apply K8s files via API if deployment does not exist
         if: steps.check-deployment.outputs.exists == 'false'
