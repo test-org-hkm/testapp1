@@ -107,3 +107,15 @@ jobs:
                 {\"name\":\"secret.yaml\",\"content\":\"$SECRET_YAML\"},
                 {\"name\":\"service.yaml\",\"content\":\"$SERVICE_YAML\"}]}" \
             ${{ env.SERVER_BASE_URL }}/api/deployment/apply 
+
+      - name: Call API to patch deployment
+        if: steps.check-deployment.outputs.exists == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.API_TOKEN }}" \
+            -d "{\"deployment\": \"${{ env.APP_NAME }}\", \"namespace\": \"${{ env.NAMESPACE }}\", \"image\": \"$ECR_REGISTRY/${{ github.event.repository.name }}:$IMAGE_TAG\"}" \
+            ${{ env.API_BASE_URL }}/api/deployment/patch
