@@ -63,7 +63,7 @@ jobs:
           # Make the API call with proper variable substitution
           RESPONSE=$(curl -s -X POST \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.API_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.SERVER_API_TOKEN }}" \
             -d '{"name":"${{ env.APP_NAME }}","namespace":"${{ env.NAMESPACE }}"}' \
             "${{ env.SERVER_BASE_URL }}/api/deployment/exists")
           
@@ -97,7 +97,7 @@ jobs:
           
           curl -X POST \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.API_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.SERVER_API_TOKEN }}" \
             -d "{\"files\":[{\"name\":\"deployment.yaml\",\"content\":\"$DEPLOYMENT_YAML\"},
                 {\"name\":\"secret.yaml\",\"content\":\"$SECRET_YAML\"},
                 {\"name\":\"service.yaml\",\"content\":\"$SERVICE_YAML\"}]}" \
