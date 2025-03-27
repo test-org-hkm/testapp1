@@ -1,0 +1,18 @@
+{
+  "repo_name": "testapp1",
+  "domain_name": "my-domain-1",
+  "cpu": "100m",
+  "ram": "256Mi",
+  "databases": {
+    "clickhouse": true,
+    "redis": false,
+    "postgres": true
+  },
+  "env_variables": {
+    "wirebus": "querty",
+    "debug": "True"
+  },
+  "namespace": "utils",
+  "port": 8000,
+  "replicas": 1
+}
