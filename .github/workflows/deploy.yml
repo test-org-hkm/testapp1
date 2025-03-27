@@ -116,6 +116,6 @@ jobs:
         run: |
           curl -X POST \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.API_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.SERVER_API_TOKEN }}" \
             -d "{\"deployment\": \"${{ env.APP_NAME }}\", \"namespace\": \"${{ env.NAMESPACE }}\", \"image\": \"$ECR_REGISTRY/${{ github.event.repository.name }}:$IMAGE_TAG\"}" \
-            ${{ env.API_BASE_URL }}/api/deployment/patch
+            ${{ env.SERVER_BASE_URL }}/api/deployment/patch
