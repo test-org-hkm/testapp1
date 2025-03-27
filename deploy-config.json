@@ -1,6 +1,6 @@
 {
   "repo_name": "testapp1",
-  "domain_name": "mydomain2",
+  "domain_name": "mydomain1",
   "cpu": "100m",
   "ram": "256Mi",
   "databases": {
