@@ -6,8 +6,8 @@ on:
       - main
 
 env:
-  API_BASE_URL: ${{ secrets.API_BASE_URL }}
-  APP_NAME: himanshu-ka-domain
+  SERVER_BASE_URL: ${{ secrets.SERVER_BASE_URL }}
+  APP_NAME: my-domain-1
   NAMESPACE: utils
   AWS_REGION: ${{ secrets.AWS_REGION }}
 
@@ -56,29 +56,18 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_NAMESPACE/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-      
+
       - name: Check if deployment exists via API
         id: check-deployment
         run: |
-          RESPONSE=$(curl -s -X GET \
+          RESPONSE=$(curl -s -X POST \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.API_TOKEN }}" \
-            "${{ env.API_BASE_URL }}/api/deployment/exists?name=${{ env.APP_NAME }}&namespace=${{ env.NAMESPACE }}")
+            -d '{"name":"${{ env.APP_NAME }}","namespace":"${{ env.NAMESPACE }}"}' \
+            "${{ env.SERVER_BASE_URL }}/api/deployment/exists")
           EXISTS=$(echo $RESPONSE | jq -r '.exists')
           echo "exists=$EXISTS" >> $GITHUB_OUTPUT
           echo "Deployment exists: $EXISTS"
-      
-      - name: Call API to patch deployment
-        if: steps.check-deployment.outputs.exists == 'true'
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          curl -X POST \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.API_TOKEN }}" \
-            -d "{\"deployment\": \"${{ env.APP_NAME }}\", \"namespace\": \"${{ env.NAMESPACE }}\", \"image\": \"$ECR_REGISTRY/${{ github.event.repository.name }}:$IMAGE_TAG\"}" \
-            ${{ env.API_BASE_URL }}/api/deployment/patch
       
       - name: Apply K8s files via API if deployment doesn't exist
         if: steps.check-deployment.outputs.exists == 'false'
@@ -93,4 +82,4 @@ jobs:
             -d "{\"files\":[{\"name\":\"deployment.yaml\",\"content\":\"$DEPLOYMENT_YAML\"},
                 {\"name\":\"secret.yaml\",\"content\":\"$SECRET_YAML\"},
                 {\"name\":\"service.yaml\",\"content\":\"$SERVICE_YAML\"}]}" \
-            ${{ env.API_BASE_URL }}/api/deployment/apply 
+            ${{ env.SERVER_BASE_URL }}/api/deployment/apply 
