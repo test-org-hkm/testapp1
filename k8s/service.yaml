@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: himanshu-ka-domain-service
+  name: my-domain-1-service
   namespace: utils
 spec:
   selector:
-    app: himanshu-ka-domain
+    app: my-domain-1
   ports:
       port: 8000
       targetPort: 8000
