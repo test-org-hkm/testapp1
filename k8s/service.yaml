@@ -7,6 +7,6 @@ spec:
   selector:
     app: my-domain-1
   ports:
-      port: 8000
+    - port: 8000
       targetPort: 8000
   type: ClusterIP 
