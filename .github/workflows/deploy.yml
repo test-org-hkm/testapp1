@@ -7,7 +7,7 @@ on:
 
 env:
   API_BASE_URL: ${{ secrets.API_BASE_URL }}
-  APP_NAME: testapp1
+  APP_NAME: himanshu-ka-domain
   NAMESPACE: utils
   AWS_REGION: ${{ secrets.AWS_REGION }}
 
