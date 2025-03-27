@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: himanshu-ka-domain
+  name: my-domain-1
   labels:
-    app: himanshu-ka-domain
+    app: my-domain-1
   namespace: utils
 spec:
   replicas:1
   selector:
     matchLabels:
-      app: himanshu-ka-domain
+      app: my-domain-1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -18,10 +18,10 @@ spec:
   template:
     metadata:
       labels:
-        app: himanshu-ka-domain
+        app: my-domain-1
     spec:
       containers:
-      - name: himanshu-ka-domain
+      - name: my-domain-1
         image: 
         imagePullPolicy: IfNotPresent
         ports:
@@ -35,7 +35,7 @@ spec:
             memory: 512Mi
         envFrom:
         - secretRef:
-            name: himanshu-ka-domain-secrets
+            name: my-domain-1-secrets
         env:
         - name: REDIS_HOST
           value: "redis-service"
