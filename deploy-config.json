@@ -9,7 +9,7 @@
     "postgres": false
   },
   "env_variables": {
-    "key": "value"
+    "Backend_URL": "http://g.com"
   },
   "namespace": "utils",
   "port": 8000,
