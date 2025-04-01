@@ -1,3 +1,4 @@
+e
 # Simple FastAPI Example
 
 A simple FastAPI application with two endpoints:
