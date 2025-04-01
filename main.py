@@ -7,7 +7,7 @@ app = FastAPI(title="Simple FastAPI App")
 def read_root():
     return {"message": "Welcome to Simple FastAPI App"}
 
-@app.get("/health-check")
+@app.get("/health")
 def health_check():
     return {"status": "healthy"}
 
