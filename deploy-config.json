@@ -1,4 +1,5 @@
 {
+  "github_repo_link": "https://github.com/test-org-hkm/testapp1",
   "domain_name": "domain_name1",
   "cpu": "100m",
   "ram": "256Mi",
