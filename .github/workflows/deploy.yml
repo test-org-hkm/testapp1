@@ -7,7 +7,7 @@ on:
 
 env:
   SERVER_BASE_URL: ${{ secrets.SERVER_BASE_URL }}
-  APP_NAME: testapp1
+  DOMAIN_NAME: domain_name1
   NAMESPACE: utils
   AWS_REGION: ${{ secrets.AWS_REGION }}
 
@@ -79,7 +79,7 @@ jobs:
           RESPONSE=$(curl -s -X POST \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.SERVER_API_TOKEN }}" \
-            -d '{"name":"${{ env.APP_NAME }}","namespace":"${{ env.NAMESPACE }}"}' \
+            -d '{"name":"${{ env.DOMAIN_NAME }}","namespace":"${{ env.NAMESPACE }}"}' \
             "${{ env.SERVER_BASE_URL }}/api/deployment/exists")
           
           # Echo the full response for debugging
@@ -127,5 +127,5 @@ jobs:
           curl -X POST \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.SERVER_API_TOKEN }}" \
-            -d "{\"deployment\": \"${{ env.APP_NAME }}\", \"namespace\": \"${{ env.NAMESPACE }}\", \"image\": \"$IMAGE\"}" \
+            -d "{\"deployment\": \"${{ env.DOMAIN_NAME }}\", \"namespace\": \"${{ env.NAMESPACE }}\", \"image\": \"$IMAGE\"}" \
             ${{ env.SERVER_BASE_URL }}/api/deployment/patch
