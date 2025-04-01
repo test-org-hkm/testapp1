@@ -5,7 +5,7 @@
   "ram": "512Mi",
   "databases": {
     "clickhouse": true,
-    "redis": false,
+    "redis": true,
     "postgres": false
   },
   "env_variables": {
