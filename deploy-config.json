@@ -1,15 +1,16 @@
 {
   "github_repo_link": "https://github.com/test-org-hkm/testapp1",
   "domain_name": "domainname1",
-  "cpu": "200m",
-  "ram": "512Mi",
+  "cpu": "100m",
+  "ram": "256Mi",
   "databases": {
     "clickhouse": true,
-    "redis": true,
-    "postgres": false
+    "redis": false,
+    "postgres": true
   },
   "env_variables": {
-    "Backend_URL": "http://g.com"
+    "wirebus": "querty",
+    "debug": "True"
   },
   "namespace": "utils",
   "port": 8000,
